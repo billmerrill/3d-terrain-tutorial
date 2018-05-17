@@ -1,45 +1,107 @@
-from utils import *
+import numpy
+
+from utils import Point, Triangle
+from stl_canvas import STLCanvas
+
+from indicies import PX, PY, PZ
 
 
-def generate_cube_points(high_point, low_point):
+class Triangle:
     """
-    From two opposing points, generate the corners of a cube.
+    A single triangles
 
-    For both surfaces, generate points in clockwise manner
-    when viewing the ouside surface.
+    A
+    |\
+    | \
+    +--\
+    B   C
     """
-    h = high_point
-    l = low_point
-    top = [h, Point(l.x, h.y, h.z), Point(h.x, h.y, l.z), Point(l.x, h.y, l.z)]
-    bottom = [l, Point(l.x, l.y, h.z), Point(h.x, l.y, l.z), Point(l.x, l.y, l.z)]
-    return top + bottom
+
+    def __init__(self, PtA, PtB, PtC):
+        self.points = [PtA, PtB, PtC]
+
+    def get_triangles(self):
+        return self.points
 
 
-def generate_rect_triangles(p0, p1, p2, p3):
+class Rectangle:
     """
-    p1 is upper left, points are clockwise,
-    looking down at the visibile surfaces.
+    A Single Rectangle
 
-            0  1
-            2  3
+    A         D
+    +---------+
+    |         |
+    +---------+
+    B         C
     """
-    t1 = Triangle(p0, p2, p3)
-    t2 = Triangle(p0, p3, p1)
-    return [t1, t2]
+
+    def __init__(self, PtA, PtB, PtC, PtD):
+        self.points = [PtA, PtB, PtC, PtD]
+
+    def __getitem__(self, x):
+        return self.points[x]
+
+    def get_triangles(self):
+        # return [(self.points[0], self.points[1], self.points[2]),
+        #         (self.points[0], self.points[2], self.points[3])]
+        return [(self.points[0], self.points[1], self.points[2]),
+                (self.points[0], self.points[2], self.points[3])]
 
 
-def generate_cube_triangles(high_point, low_point):
-    corners = generate_cube_points(high_point, low_point)
-    surfaces = [
-        corners[0:3],
-        corners[4:7],
-        [corners[0], corners[2], corners[7], corners[5]],
-        [corners[2], corners[3], corners[4], cornesr[5]],
-        [corners[3], corners[1], corners[4], corners[6]],
-        [corners[1], corners[0], corners[6], corners[6]],
-    ]
-    triangles = []
-    for s in surfaces:
-        triangles.append(generate_rect_triangles(s))
 
-    return triangles
+class Box:
+    """
+    A Single Rectangular Prism
+
+    far
+    +-------+
+    |\       \
+    | \       \
+    |  +-------+
+    \  |       |
+     \ |       |
+      \+-------+
+               near
+
+    +Y
+    |
+    |
+    |---- +X
+     \
+      \
+       +Z
+    """
+    def __init__(self, near, far):
+        self.near = near
+        self.far = far
+
+    def get_triangles(self):
+        top = Rectangle(self.far,
+                        (self.far[PX], self.far[PY], self.near[PZ]),
+                        (self.near[PX], self.far[PY], self.near[PZ]),
+                        (self.near[PX], self.far[PY], self.far[PZ]))
+
+        bottom = Rectangle((self.far[PX], self.near[PY], self.near[PZ]),
+                           (self.far[PX], self.near[PY], self.far[PZ]),
+                           (self.near[PX], self.near[PY], self.far[PZ]),
+                           self.near)
+
+        sides = []
+        # sides.append(Rectangle(top[0], bottom[1], bottom[0], top[1]))
+        # sides.append(Rectangle(top[1], bottom[0], bottom[3], top[2]))
+        # sides.append(Rectangle(top[2], bottom[3], bottom[2], top[3]))
+        # sides.append(Rectangle(top[3], bottom[2], bottom[1], top[0]))
+
+        triangles = top.get_triangles()
+        triangles.extend(bottom.get_triangles())
+        for s in sides:
+            triangles.extend(s.get_triangles())
+
+        return triangles
+
+
+def output_cube_stl(filename, triangles):
+    canvas = STLCanvas()
+    canvas.add_triangles(cube_triangles)
+    # canvas.write_ascii_stl(filename, make_positive=False)
+    canvas.write_stl(filename, make_positive=False)
