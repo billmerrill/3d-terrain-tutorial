@@ -52,10 +52,10 @@ class RectangleTests(unittest.TestCase):
         ), results)
 
     def test_rectangle_stl(self):
-        nw = Point(-20, 1, 19)
-        se = Point(18, 1, -17)
-        ne = Point(se.x, se.y, nw.z)
-        sw = Point(nw.x, nw.y, se.z)
+        nw = Point(-20, 2, -17)
+        sw = Point(-20, 2, 19)
+        se = Point(18, 2, 19)
+        ne = Point(18, 2, -17)
 
         r1 = Rectangle(nw, sw, se, ne)
         canvas = STLCanvas()
@@ -63,9 +63,9 @@ class RectangleTests(unittest.TestCase):
         canvas.write_stl('example_test_rect.stl', make_positive=False)
 
     def test_cube_stl(self):
-        high = Point(-20, 16, 19)
-        low = Point(18, -15, -17)
-        b1 = Box(low, high)
+        far = Point(-20, 16, -17)
+        near = Point(18, -15, 19)
+        b1 = Box(near, far)
         canvas = STLCanvas()
         canvas.add_shape(b1)
         canvas.write_stl('example_test_cube.stl', make_positive=False)

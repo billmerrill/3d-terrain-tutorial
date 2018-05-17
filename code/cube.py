@@ -42,12 +42,8 @@ class Rectangle:
         return self.points[x]
 
     def get_triangles(self):
-        # return [(self.points[0], self.points[1], self.points[2]),
-        #         (self.points[0], self.points[2], self.points[3])]
         return [(self.points[0], self.points[1], self.points[2]),
                 (self.points[0], self.points[2], self.points[3])]
-
-
 
 class Box:
     """
@@ -76,7 +72,7 @@ class Box:
         self.far = far
 
     def get_triangles(self):
-        top = Rectangle(self.far,
+        top = Rectangle((self.far[PX], self.far[PY], self.far[PZ]),
                         (self.far[PX], self.far[PY], self.near[PZ]),
                         (self.near[PX], self.far[PY], self.near[PZ]),
                         (self.near[PX], self.far[PY], self.far[PZ]))
@@ -87,10 +83,10 @@ class Box:
                            self.near)
 
         sides = []
-        # sides.append(Rectangle(top[0], bottom[1], bottom[0], top[1]))
-        # sides.append(Rectangle(top[1], bottom[0], bottom[3], top[2]))
-        # sides.append(Rectangle(top[2], bottom[3], bottom[2], top[3]))
-        # sides.append(Rectangle(top[3], bottom[2], bottom[1], top[0]))
+        sides.append(Rectangle(top[0], bottom[1], bottom[0], top[1]))
+        sides.append(Rectangle(top[1], bottom[0], bottom[3], top[2]))
+        sides.append(Rectangle(top[2], bottom[3], bottom[2], top[3]))
+        sides.append(Rectangle(top[3], bottom[2], bottom[1], top[0]))
 
         triangles = top.get_triangles()
         triangles.extend(bottom.get_triangles())

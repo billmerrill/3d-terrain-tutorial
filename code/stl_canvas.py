@@ -23,6 +23,7 @@ class STLCanvas:
         N = (Nraw[PX] / hypo,
              Nraw[PY] / hypo,
              Nraw[PZ] / hypo)
+
         return N
 
     def add_shape(self, shape):
